@@ -1,0 +1,233 @@
+from abc import ABC, abstractmethod
+
+
+class Property(ABC):
+    def __init__(self, address, price, features):
+        self.address = address
+        self.price = price
+        self.features = features
+
+    @abstractmethod
+    def discount(self):
+        pass
+
+
+class ResidentialProperty(Property):
+    def discount(self):
+        self.price = self.price * 0.9
+
+
+class CommercialProperty(Property):
+    def discount(self):
+        self.price = self.price * 0.7
+
+
+class Agent:
+    def __init__(self, name, contactInfo, balance):
+        self.name = name
+        self.contactInfo = contactInfo
+        self.balance = balance
+        self.propertiesAvailable = []
+        self.clients = []
+
+    def addClient(self, info):
+        self.clients.append(info)
+
+
+    def profit(self, property):
+        profit = property.price * 0.1
+        self.balance += profit
+
+
+class Client:
+    def __init__(self, name, contactInfo, balance):
+        self.name = name
+        self.contactInfo = contactInfo
+        self.balance = balance
+        self.currentlyAvailable = []
+        self.properties = []
+        self.__agent = None
+
+    def getMoney(self, property):
+        self.balance -= property.price
+
+    def getAgent(self):
+        return self.__agent
+
+    def setAgent(self, agent):
+        self.__agent = agent
+
+
+from abc import ABC, abstractmethod
+import random
+import agent, client, property
+
+
+class RealEstateSystem(ABC):
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def addProperty(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def searchProperty(self, client, address):
+        raise NotImplementedError
+
+    @abstractmethod
+    def purchaseProperty(self, property, client, agent):
+        raise NotImplementedError
+
+    @abstractmethod
+    def getAgent(self, client):
+        raise NotImplementedError
+
+
+class MySystem(RealEstateSystem):
+    def __init__(self):
+        self.properties = []
+        self.agents = []
+        self.clients = []
+
+    def addProperty(self, property):
+        self.properties.append(property)
+        for agent in self.agents:
+            agent.propertiesAvailable.append(property)
+
+    def searchProperty(self, client, address):
+        for property in self.properties:
+            if property.address == address:
+                client.currentlyAvailable.append(property)
+
+    def purchaseProperty(self, property, client, agent):
+        if client.balance >= property.price:
+            client.properties.append(property)
+            client.getMoney(property)
+            client.getAgent().profit(property)
+        else:
+            print('Not enough money')
+
+    def getAgent(self, client):
+        agent = random.randint(0, len(self.agents))
+        client.setAgent(self.agents[agent])
+
+        info = {'name': client.name, 'contact': client.contactInfo}
+        agent.addClient(info)
+
+
+# Write a program that simulates a social media platform. The program should have classes for users, posts, and comments.
+# Users should have attributes such as name and contact information.
+# Posts should have attributes such as the user making the post, the post content, and the date/time of the post.
+# Comments should have attributes such as the user making the comment, the comment content, and the date/time of the comment.
+# The program should allow users to create and share posts, comment on posts, and interact with other users.
+# Use inheritance to implement classes for different types of posts (e.g., text, photo) and abstract classes for social media operations.
+
+from abc import ABC, abstractmethod
+
+
+class User:
+    def __init__(self, name, contact):
+        self.name = name
+        self.contact = contact
+        self.__posts = []
+        self.__messages = {}
+
+    def addPost(self, post):
+        self.__posts.append(post)
+
+    def receiveMessage(self, userName, message):
+        if userName in self.__messages:
+            self.__messages[userName].append(message)
+        else:
+            self.__messages.update({userName: [message]})
+
+
+class Post(ABC):
+    def __init__(self, user, content, date):
+        self.user = user
+        self.content = content
+        self.date = date
+        self.__comments = []
+
+    @abstractmethod
+    def viewPost(self):
+        raise NotImplementedError
+
+    def viewComment(self):
+        for comment in self.__comments:
+            print(comment)
+
+    def addComment(self, comment):
+        self.__comments.append(comment)
+
+
+class Text(Post):
+    def viewPost(self):
+        return f'{self.user.name} ({self.date}):\n "{self.content}"'
+
+
+class Photo(Post):
+    def viewPost(self):
+        return f'{self.user.name} ({self.date}):\n **{self.content}**'
+
+
+class Comment:
+    def __init__(self, user, content, date):
+        self.user = user
+        self.content = content
+        self.date = date
+
+    def __str__(self):
+        return f'{self.user.name} ({self.date}):\n {self.content}'
+
+
+class SocialMediaPlatform(ABC):
+    def __init__(self):
+        self.__users = []
+
+    @abstractmethod
+    def register(self, userName, userContact):
+        raise NotImplementedError
+
+    @abstractmethod
+    def createPost(self, type, user, content, date):
+        raise NotImplementedError
+
+    @abstractmethod
+    def sharePost(self, userName, post):
+        raise NotImplementedError
+
+    @abstractmethod
+    def commentPost(self, user, post, comment):
+        raise NotImplementedError
+
+    @abstractmethod
+    def sendMessage(self, sender, receiver, message):
+        receiver.receiveMessage(sender, message)
+
+
+class Facebook(SocialMediaPlatform):
+    def register(self, userName, userContact):
+        user = User(userName, userContact)
+        self.__users.append(user)
+
+    def createPost(self, type, user, content, date):
+        if type == 'Text':
+            post = Text(user, content, date)
+        elif type == 'Photo':
+            post = Photo(user, content, date)
+        user.addPost(post)
+
+    def sharePost(self, userName, post):
+        for user in self.__users:
+            if user.name == userName:
+                user.addPost(post)
+                break
+
+    def commentPost(self, post, user, comment, date):
+        comment = Comment(user, comment, date)
+        post.addComment(comment)
+
+    def sendMessage(self, sender, receiver, message):
+        receiver.receiveMessage(sender, message)
