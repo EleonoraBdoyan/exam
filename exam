@@ -339,6 +339,125 @@ system.rent_movie(m, c, 20)
 c.view_rental_history()
 
 
+class Movie:
+    def __init__(self, title: str, duration: float, rating: float):
+        self.title = title
+        self.duration = duration
+        self.rating = rating
+
+movie  = Movie("Kino", 1.5, 5)
+
+class Client:
+    def __init__(self, name: str, contact_information: str):
+        self.name = name
+        self.contact_information = contact_information
+        self.ticket = None
+        self.available_movie = []
+
+client  = Client("Eleonora", "093420841")
+
+class Ticket:
+    def __init__(self, movie_time, showtime, seat_number):
+        self.movie_time = movie_time
+        self.showtime = showtime
+        self.seat_number = seat_number
+
+
+class Admin:
+    def __init__(self, name):
+        self.name = name
+        self.movies = []
+
+
+
+    def add_movies(self, movie):
+        self.movies.append(movie)
+
+    def remove_movies(self, movie):
+        self.movies.remove(movie)
+
+admin = Admin("HHHH")
+
+class BookingSystem:
+    def __init__(self):
+        self.clients = []
+        self.showtimes = {}
+        self.movies = []
+        self.seats = [1, 2, 3, 4, 5]
+
+    def add_client(self, name, contact_information):
+        client = Client(name, contact_information)
+        self.clients.append(client)
+
+    def search_movies(self, movie_title, client):
+        for i in self.movies:
+            if i.title.lower() == movie_title.lower():
+                client.available_movie.append(movie)
+
+    def add_movies(self, movie, admin):
+        admin.add_movies(movie)
+        self.movies.append(movie)
+
+    def remove_movies(self, movie, admin):
+        admin.remove_movies(movie)
+        self.movies.remove(movie)
+
+    def add_show_time(self, movie, time):
+        self.showtimes[movie.title] = [self.seats, time]
+
+    def buy_ticket(self, movie, client, time):
+        import random
+        if movie in self.movies and not len(self.showtimes[movie][0]) <= 0 and time == self.showtimes[movie][1]:
+            seat = random.choice(self.showtimes[movie][0])
+            self.showtimes[movie][0].remove(seat)
+            ticket = Ticket(movie, seat, time)
+            client.ticket = ticket
+        else:
+            print("no movie")
+
+
+    def report(self):
+        path = input("Enter file name") + "txt"
+        with open(path, "w") as f:
+            for i, j in self.showtimes.items():
+                f.write(f"{i}, {j[0]}, {j[1]}" )
+
+
+
+booking = BookingSystem()
+booking.add_movies(movie, admin)
+print(booking.movies)
+booking.add_show_time(movie, "3:00" )
+print(booking.showtimes)
+booking.buy_ticket(movie, client, "3:00")
+print(client.ticket)
+booking.report()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
