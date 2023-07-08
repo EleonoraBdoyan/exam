@@ -231,3 +231,117 @@ class Facebook(SocialMediaPlatform):
 
     def sendMessage(self, sender, receiver, message):
         receiver.receiveMessage(sender, message)
+
+
+# Write a program that simulates a movie rental system.
+# The program should allow customers to search for and rent movies,
+# view their rental history, and return movies. Use interfaces to implement classes for different
+# types of movies (e.g., comedy, drama) and abstract classes for rental operations.
+import abc
+
+
+class Movie(abc.ABC):
+    def __init__(self, title: str, price: int):
+        self.title = title
+        self.price = price
+        self.genre = self.__class__.__name__
+        self.rating = 0
+
+    @abc.abstractmethod
+    def discount(self):
+        raise NotImplementedError
+
+
+class Comedy(Movie):
+    def discount(self):
+        self.price = self.price * 0.9
+
+
+class Drama(Movie):
+    def discount(self):
+        self.price = self.price * 0.9
+
+
+class Customer:
+    def __init__(self, name, contact_information, money):
+        self.name = name
+        self.contact_information = contact_information
+        self.money = money
+        self.movie_availibility = []
+        self.rented_movies = []
+        self.rental_history = []
+
+    def view_rental_history(self):
+        for i in self.rental_history:
+            print(f"{i.movie.title}, {i.duration}")
+
+
+class Rental:
+    def __init__(self, customer, movie, duration):
+        self.customer = customer
+        self.movie = movie
+        self.duration = duration
+
+    # def get_movie_title(self):
+    #     print(self.movie.title)
+    #     return self.movie.title
+
+class RentalSystem(abc.ABC):
+    @abc.abstractmethod
+    def search_movie(self, customer, movie_title):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def rent_movie(self, movie, customer, duration):
+        raise NotImplementedError
+
+
+class MySystem(RentalSystem):
+    def __init__(self):
+        self.movies = []
+        self.customers = []
+        self.rentals = []
+
+    def add_movie(self, movie):
+        self.movies.append(movie)
+
+    def add_customer(self, customer):
+        self.customers.append(customer)
+
+    def search_movie(self, customer, movie_title):
+        for i in self.movies:
+            if i.title == movie_title:
+                customer.movie_availibility.append(i)
+
+    def rent_movie(self, movie, customer, duration):
+        movie.discount()
+        if customer.money >= movie.price:
+            customer.rented_movies.append(movie)
+            self.movies.remove(movie)
+            customer.money -= movie.price
+            rental = Rental(customer, movie, duration)
+            self.rentals.append(rental)
+            customer.rental_history.append(rental)
+
+
+m = Comedy("KINO", 100)
+c = Customer("Elonora", "093420841", 200)
+system = MySystem()
+system.add_movie(m)
+print(system.movies)
+system.add_customer(c)
+print(system.customers)
+
+
+system.search_movie(c, "KINO")
+print(c.movie_availibility)
+system.rent_movie(m, c, 20)
+c.view_rental_history()
+
+
+
+
+
+
+
+
