@@ -746,6 +746,136 @@ meter_number = input("Enter meter number for bill generation: ")
 system.bill_generation(meter_number)
 
 
+from datetime import datetime
+
+
+class Customer:
+    def __init__(self):
+        self.name = input("Enter your name: ")
+        self.info = input("Enter your tel. number: ")
+        self.interaction_history = []
+
+
+class Interaction:
+    def __init__(self, customer):
+        self.customer = customer
+
+
+class Sale(Interaction):
+    def __init__(self, customer):
+        super().__init__(customer)
+        self.date = None
+        self.amount = input("Enter sale amount: ")
+        self.warranty = None
+        self.compliant = None
+        self.product = input("Enter the product you want to bay: ")
+
+
+class Warranty(Interaction):
+    def __init__(self, customer, sale):
+        super().__init__(customer)
+        self.sale = sale
+        self.warranty_cost = input("Enter warranty cost:")
+        self.warranty_period = input("Enter warranty period: ")
+
+
+class Compliant(Interaction):
+    def __init__(self, customer, sale):
+        super().__init__(customer)
+        self.sale = sale
+        self.description = input("Enter your compliant: ")
+
+
+class CRMSystem:
+    def __init__(self):
+        self.customers = []
+        self.sails = []
+        self.compliants = []
+        self.warranties = []
+
+    def register_customer(self):
+        customer = Customer()
+        if customer.name.lower() in [i.name.lower() for i in self.customers]:
+            print(f"There is already a customer with name {customer.name}. Try again. ")
+        else:
+            self.customers.append(customer)
+
+    def do_interaction(self):
+        customer_name = input("Enter your name: ")
+        if customer_name.lower() not in [i.name.lower() for i in self.customers]:
+            print("At first you must register.")
+        else:
+            for i in self.customers:
+                if i.name.lower() == customer_name.lower():
+                    customer = i
+                    inter_type = input("Enter 1 for sale, 2 for complaint: ")
+                    if inter_type.strip() == "1":
+                        sale = Sale(customer)
+                        sale.date = datetime.now()
+                        self.sails.append(sale)
+                        warranty = Warranty(customer, sale)
+                        sale.warranty = warranty
+                        customer.interaction_history.append(sale)
+                        customer.interaction_history.append(warranty)
+                        self.warranties.append(warranty)
+                    elif inter_type.strip() == "2":
+                        if len(customer.interaction_history) > 0:
+                            product_type = input("Enter sold product type you have compliant about: ")
+                            for i in customer.interaction_history:
+                                if i.product == product_type:
+                                    sale = i
+                                    compliant = Compliant(customer, sale)
+                                    customer.interaction_history.append(compliant)
+                                    sale.compliant = compliant
+                                    self.compliants.append(compliant)
+                                    break
+                                else:
+                                    print("You haven't bought such a product.")
+                        else:
+                            print("You haven't  bought anything.")
+                    else:
+                        print("You must enter 1 or 2.")
+
+    def report_generation(self):
+        customer_name = input("Customer name you want to generate report: ")
+        if customer_name.lower() not in [i.name.lower() for i in self.customers]:
+            print("At first you must register.")
+        else:
+            for i in self.customers:
+                if i.name.lower() == customer_name.lower():
+                    customer = i
+                    warranty = 0
+                    sale = 0
+                    compliant = 0
+                    for j in customer.interaction_history:
+                        if type(j) == Warranty:
+                            warranty += 1
+                        if type(j) == Sale:
+                            sale += 1
+                        if type(j) == Compliant:
+                            compliant += 1
+                    date_time = datetime.now().strftime("%Y-%m-%d")
+                    customer_info = f"Customer name is {customer.name}, customer tel number is {customer.info}"
+                    print(customer_info + f"\nInteraction info is the following: warranty-{warranty}, sale-{sale}, compliant-{compliant}")
+                    with open(f"{customer_name}_{date_time}.txt", "w") as f:
+                        f.write(customer_info + f"\nInteraction info is the following: warranty-{warranty}, sale-{sale}, compliant-{compliant}")
+
+
+def client():
+    system = CRMSystem()
+    while True:
+        action = input("Enter 1 for registration, 2 for interaction, 3 for report: ")
+        if "1" in action:
+            system.register_customer()
+        if "2" in action:
+            system.do_interaction()
+        if "3" in action:
+            system.report_generation()
+        if "0" in action:
+            break
+
+client()
+
 
 
 
