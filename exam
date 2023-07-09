@@ -436,7 +436,127 @@ booking.report()
 
 
 
+# Write a program that simulates a banking system. The program should have classes
+# for customers, accounts, and transactions. Customers should have attributes such as name,
+# address, and contact information. Accounts should have attributes such as account type, balance,
+# and interest rate. Transactions should have attributes such as the account involved, the transaction type,
+# and the amount of the transaction. Use inheritance to implement classes for different types of accounts
+# (e.g., savings, checking) and abstract classes for account operations.
+import abc
 
+
+class Customer:
+    def __init__(self, name, address, contact_info):
+        self.name = name
+        self.address = address
+        self.contact_info = contact_info
+        self.account = []
+
+
+class Account:
+
+    def __init__(self, account_number):
+        self.type = self.__class__.__name__
+        self.balance = 0
+        self.rate = 0
+        self.account_number = account_number
+
+    def add_money(self, account_number, amount):
+        self.balance += amount
+
+    def withdraw_money(self, account_number, amount):
+        self.balance -= amount
+
+
+
+
+
+class Savings(Account):
+    def __init__(self, account_number):
+        super().__init__(account_number)
+        self.rate = 0.1
+
+    def add_rate_to_balance(self):
+        self.balance += self.balance * self.rate
+
+
+class Transaction:
+    def __init__(self, amount, transaction_type):
+        self.account = account
+        self.transaction_type = transaction_type
+        self.amount = amount
+
+    def transactin(self, account_number, amount, type):
+        if type == "add":
+            account.add_money(account_number, amount)
+        elif type == "withdraw":
+            account.withdraw_money(account_number, amount)
+        else:
+            print("Incorrect transaction type.")
+
+
+class Bank(abc.ABC):
+    @abc.abstractmethod
+    def add_clients(self, customer):
+        pass
+
+    @abc.abstractmethod
+    def add_accounts(self, customer):
+        pass
+
+    @abc.abstractmethod
+    def add_money(self, account_number, amount):
+        pass
+
+    @abc.abstractmethod
+    def withdraw_money(self, customer, account_number, amount):
+        pass
+
+class MyBank(Bank):
+    def __init__(self):
+        self.customers = []
+        self.accounts = []
+
+
+    def add_clients(self, customer):
+        self.customers.append(customer)
+
+    def add_accounts(self, customer, type, account_number):
+        if not account_number in [i.account_number for i in self.accounts]:
+            if type == "savings":
+                account = Savings(account_number)
+                customer.account.append(account)
+                self.accounts.append(account)
+
+    def add_money(self, account_number, amount):
+
+        for i in self.accounts:
+            if i.account_number == account_number:
+                i.balance += amount
+
+    def withdraw_money(self, customer, account_number, amount):
+        for i in customer.account:
+            if i.account_number == account_number:
+                if i.balance >= amount:
+                    i.balance -= amount
+                else:
+                    print("Insufficient funds.")
+                    break
+            else:
+                print("It's not your account.")
+
+customer = Customer("99","yerevan", "093420841")
+bank = MyBank()
+bank.add_clients(customer)
+bank.add_accounts(customer, "savings", 123456)
+bank.add_accounts(customer, "savings", 123458)
+bank.add_money(123456, 200)
+for i in bank.accounts:
+    print(i.balance)
+
+bank.withdraw_money(customer, 123459, 300)
+for i in customer.account:
+    print(i.balance)
 
 
 
