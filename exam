@@ -469,9 +469,6 @@ class Account:
         self.balance -= amount
 
 
-
-
-
 class Savings(Account):
     def __init__(self, account_number):
         super().__init__(account_number)
@@ -504,7 +501,7 @@ class Bank(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def add_accounts(self, customer):
+    def add_accounts(self, customer,  type, account_number):
         pass
 
     @abc.abstractmethod
@@ -519,6 +516,7 @@ class MyBank(Bank):
     def __init__(self):
         self.customers = []
         self.accounts = []
+        self.baza = {}
 
 
     def add_clients(self, customer):
@@ -530,6 +528,7 @@ class MyBank(Bank):
                 account = Savings(account_number)
                 customer.account.append(account)
                 self.accounts.append(account)
+                self.baza[account] = customer
 
     def add_money(self, account_number, amount):
 
@@ -548,7 +547,13 @@ class MyBank(Bank):
             else:
                 print("It's not your account.")
 
-customer = Customer("99","yerevan", "093420841")
+    def report(self):
+        path = input("Enter filename: ")
+        with open(path + ".txt", "w") as f:
+            for i, j in self.baza.items():
+                f.write(f"{i.account_number}, {i.balance}, {j.name}\n")
+
+customer = Customer("Eleonora","yerevan", "093420841")
 bank = MyBank()
 bank.add_clients(customer)
 bank.add_accounts(customer, "savings", 123456)
@@ -557,8 +562,10 @@ bank.add_money(123456, 200)
 for i in bank.accounts:
     i.add_rate_to_balance()
 
-# for i in bank.accounts:
-#     print(i.balance)
+bank.report()
+
+
+
 
 
 
