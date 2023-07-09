@@ -443,6 +443,7 @@ booking.report()
 # and the amount of the transaction. Use inheritance to implement classes for different types of accounts
 # (e.g., savings, checking) and abstract classes for account operations.
 import abc
+from datetime import datetime
 
 
 class Customer:
@@ -477,7 +478,9 @@ class Savings(Account):
         self.rate = 0.1
 
     def add_rate_to_balance(self):
-        self.balance += self.balance * self.rate
+        if datetime.now().day == 9:
+            self.balance += self.balance * self.rate
+            print(self.balance)
 
 
 class Transaction:
@@ -552,11 +555,11 @@ bank.add_accounts(customer, "savings", 123456)
 bank.add_accounts(customer, "savings", 123458)
 bank.add_money(123456, 200)
 for i in bank.accounts:
-    print(i.balance)
+    i.add_rate_to_balance()
 
-bank.withdraw_money(customer, 123459, 300)
-for i in customer.account:
-    print(i.balance)
+# for i in bank.accounts:
+#     print(i.balance)
+
 
 
 
