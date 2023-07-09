@@ -564,6 +564,118 @@ for i in bank.accounts:
 
 bank.report()
 
+# Write a program that simulates a hospital management system.
+# The program should have classes for patients, doctors, and medical staff.
+# Patients should have attributes such as name, age, and medical history.
+# Doctors should have attributes such as name and contact information.
+# Medical staff should have attributes such as name and position. The
+# program should allow doctors to manage patient information and appointments,
+# and medical staff to manage hospital operations. Use inheritance to implement
+# classes for different types of medical procedures (e.g., surgeries, check-ups) and abstract
+# classes for medical operations.
+import abc
+import datetime
+
+class Patient:
+    def __init__(self):
+        print("dear  patient enter your details")
+        self.name = input("Enter name: ")
+        self.check_name(self.name)
+        self.gender = input("Enter gender: ")
+        self.date_of_birth = input("Enter date_of_birth: ")
+        self.contact_info = input("Enter your tel number: ")
+        self.condition = input("Enter medical condition: ")
+        self.medical_history = None
+
+    @staticmethod
+    def check_name(name):
+        if not name.isalpha():
+            raise TypeError
+
+
+class Doctors:
+    def __init__(self):
+        print("Dear doctor enter your details: ")
+        self.name = input("Enter your nmae.")
+        self.specialization = input("Enter your specialization.")
+        self.experince_years = input("Enter your experience_years.")
+        self.contact_info = input("Enter your tel number:")
+
+class MedHistory:
+    def __init__(self, patient):
+        self.patient = patient
+        self.diagnoses = []
+        self.treatments = []
+        self.medications = []
+
+
+class HealthCareSystem:
+    def __init__(self):
+        self.patients = []
+        self.doctors = []
+
+    def register_doctors(self):
+        doctor = Doctors()
+        self.doctors.append(doctor)
+
+    def register_patient(self):
+        patient = Patient()
+        self.patients.append(patient)
+
+    def med_history_record(self, patient_name):
+        patient = None
+        for i in self.patients:
+            if i.name.lower() == patient_name.lower():
+                patient = i
+        if patient_name.lower() not in [i.name.lower() for i in self.patients]:
+            print("You should register at first.")
+            return
+        medical_history = MedHistory(patient)
+        patient.medical_history = medical_history
+        record_type = input("Enter what do you want to record,1 for diagnoses,2 for treatments and 3 for medications.")
+        if "1" in record_type:
+            diagnoses = input("Enter diagnoses: ")
+            medical_history.diagnoses.append(diagnoses)
+        if "2" in record_type:
+            treatments = input("Enter treatments: ")
+            medical_history.treatments.append(treatments)
+        if "3" in record_type:
+            medications = input("Enter medications")
+            medical_history.medications.append(medications)
+        with open(f"{patient.name}.txt", "a") as f:
+            f.write(f'''personal details: name is {patient.name}, "
+                    date of birth is {patient.date_of_birth}, gender is {patient.gender}, contact information, current condition is {patient.condition}.\n 
+                    medical_history: diagnoses are {patient.medical_history.diagnoses}, treatments are {patient.medical_history.treatments}, medications are {patient.medical_history.medications}''')
+
+
+    def med_history_generation(self, patient_name):
+        for i in self.patients:
+            if i.name == patient_name:
+                print(f"personal details: name is {i.name}, date of birth is {i.date_of_birth}, gender is {i.gender}, contact information is {i.medical_history}, current condition is {i.condition}.")
+                print(f"medical_history: diagnoses are {i.medical_history.diagnoes}, treatments are {i.medical_history.treatments}, medications are {i.medical_history.medications}")
+            else:
+                print("There is no such a patient.")
+
+
+def client():
+    system = HealthCareSystem()
+    while True:
+        action = input("Enter 1 to add doctor, 2, to add patient, 3 to record medical history and save into file, 4 to see medical history of a patient.")
+        if "1" in action:
+            system.register_doctors()
+        if "2" in action:
+            system.register_patient()
+        if "3" in action:
+            patient_name  = input("Enter patinet name: ")
+            system.med_history_record(patient_name)
+        if "4" in action:
+            patient_name  = input("Enter patinet name: ")
+            system.med_history_generation(patient_name)
+        if "0" in action:
+            break
+
+
+client()
 
 
 
