@@ -677,6 +677,76 @@ def client():
 
 client()
 
+import datetime
+
+
+class Customer:
+    def __init__(self):
+        self.name = input("Enter your name: ")
+        self.contact = input("Enter your tel. number: ")
+        self.meter_number = None
+        self.consumption = 0
+        self.bill = []
+        self.meter = None
+
+
+class Meter:
+    def __init__(self):
+        self.rate = input("Enter unit price: ")
+        self.consumption = 0
+        self.number = input("Enter meter number: ")
+        self.customer = None
+
+
+class Bill:
+    def __init__(self, consumption, customer, total):
+        self.consumption = consumption
+        self.customer = customer
+        self.total = total
+
+
+class System:
+    def __init__(self):
+        self.customers = []
+        self.bills = []
+
+
+    def register_customer(self):
+        meter = Meter()
+        customer = Customer()
+        customer.meter_number = meter.number
+        meter.customer = customer
+        customer.meter = meter
+        self.customers.append(customer)
+
+
+    def bill_generation(self, meter_number):
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        if meter_number not in [i.meter_number for i in self.customers]:
+            print("You must register at first.")
+        else:
+            customer = None
+            for i in self.customers:
+                if i.meter_number == meter_number:
+                    customer = i
+                customer.consumption += int(input("Enter electricity consuption units: "))
+                customer.meter.consumption = customer.consumption
+                due_amount = customer.consumption * int(customer.meter.rate)
+                bill = Bill(customer.consumption, customer, due_amount)
+                customer.bill.append(bill)
+                self.bills.append(bill)
+                print(f"for {customer.name} was generated a bill with the following details: consumption is {customer.consumption} units and due_amount is {due_amount} AMD.")
+                with open(f"{customer.name}_{current_date}.txt", "w") as f:
+                    f.write(f"{customer.name} - customer.consumption is {customer.consumption}, total due amount is {bill.total}")
+
+
+system = System()
+system.register_customer()
+meter_number = input("Enter meter number for bill generation: ")
+system.bill_generation(meter_number)
+
+
+
 
 
 
