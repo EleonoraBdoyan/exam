@@ -1027,7 +1027,7 @@ class OrderSystem:
         print(f"Bill details")
         for i in bill.dishes:
             print(f"{i.name}-{i.price}AMD\n")
-        with open(f"{customer.name}_{order_date}.txt", "a") as f:
+        with open(f"{customer.name}_{order_date}.txt", "w") as f:
             for i in bill.dishes:
                 f.write(f"{i.name}-{i.price}AMD\n")
 
