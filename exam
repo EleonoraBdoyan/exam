@@ -876,6 +876,211 @@ def client():
 
 client()
 
+import abc
+
+
+
+class Restaurant():
+    def __init__(self):
+        self.name = input("Enter restaurant name: ")
+        self.menu = Menu()
+        self.location = input("Enter location: ")
+
+    def add_dish_to_menu(self):
+        while True:
+            dish = Dish()
+            if dish.name.lower() in [dish.name.lower() for dish in self.menu.dishes]:
+                print(f"There is already dish with name {dish.name}")
+                del dish
+                continue
+            else:
+                self.menu.dishes.append(dish)
+                break
+
+    def remove_dish_from_menu(self):
+        while True:
+            dish_name = input("Enter dish name you want to remove from menu: ")
+            if dish_name.lower() not in [dish.name.lower() for dish in self.menu.dishes]:
+                continue
+            else:
+                break
+        for dish in self.menu.dishes:
+            if dish.name.lower() == dish.name.lower():
+                self.menu.dishes.remove(dish)
+
+
+class Customer:
+    def __init__(self):
+        self.name = input("Enter your name: ")
+        self.contact_info = input("Enter your tel. number: ")
+        self.payment_method = input("Enter payment method ")
+        self.bill = None
+
+
+class Bill:
+    def __init__(self):
+        self.dishes = []
+        self.due_amount = 0
+        self.date = None
+
+
+class Order:
+    def __init__(self):
+        self.id = input("Create order id for tracking your order: ")
+        self.estimated_time = None
+        self.status = None
+        self.start_time = None
+        self.dish_max_time = None
+
+
+class Dish:
+    def __init__(self):
+        self.name = input("Enter dish name: ")
+        self.price = input("Enter dish price: ")
+        self.preparation_period = input("Enter preparation period in minutes: ")
+
+
+class Menu:
+    def __init__(self):
+        self.dishes = []
+
+    def menu_description(self):
+        for dish in self.dishes:
+            print(f"{dish.name} - {dish.price}AMD\n")
+
+
+class OrderSystem:
+    def __init__(self):
+        self.restaurants = []
+        self.customers = []
+        self.orders = []
+
+    def add_restaurant(self):
+        while True:
+            restaurant = Restaurant()
+            if restaurant.name.lower() in [restaurant.name.lower() for restaurant in self.restaurants]:
+                print(f"There is already customer with name {restaurant.name}")
+                del restaurant
+                continue
+            else:
+                self.restaurants.append(restaurant)
+                return restaurant
+
+    def add_customer(self):
+        while True:
+            customer = Customer()
+            if customer.name.lower() in [customer.name.lower() for customer in self.customers]:
+                print(f"There is already customer with name {customer.name}")
+                del customer
+                continue
+            else:
+                self.customers.append(customer)
+                break
+
+    def place_order(self):
+        from datetime import datetime
+        from time import time
+        order_date = datetime.now().strftime("%Y-%m-%d")
+        customer_name = input("Enter  your name: ")
+        if customer_name.lower() not in [customer.name.lower() for customer in self.customers]:
+            print("You must register at first.")
+        else:
+            customer = None
+            for i in self.customers:
+                if i.name.lower() == customer_name:
+                    customer = i
+                    break
+        restaurant_name = input("Enter restaurant name: ")
+        if restaurant_name.lower() not in [restaurant.name.lower() for restaurant in self.restaurants]:
+            print("You must register at first.")
+        else:
+            restaurant = None
+            for j in self.restaurants:
+                if j.name.lower() == restaurant_name:
+                    restaurant = j
+                    break
+        print("Menu")
+        restaurant.menu.menu_description()
+        bill = Bill()
+        while True:
+            dish_name = input("Enter dish name from the menu or 0 to complete order: ")
+            if dish_name == "0":
+                break
+            elif dish_name.lower() not in [dish.name.lower() for dish in restaurant.menu.dishes]:
+                print("Enter dish name from menu.")
+            else:
+                for i in restaurant.menu.dishes:
+                    if i.name == dish_name:
+                        bill.dishes.append(i)
+                        bill.due_amount += int(i.price)
+                        bill.date = order_date
+        if len(bill.dishes) > 0:
+            customer.bill = bill
+        else:
+            print("You haven't chosen anything. Try again.")
+            return
+        order = Order()
+        self.orders.append(order)
+        order.start_time = time()
+        order.dish_max_time = max([int(dish.preparation_period) for dish in bill.dishes]) * 60
+        order.estimated_time = f"{(max([int(dish.preparation_period) for dish in bill.dishes]) + 30)//60}hours and {(max([int(dish.preparation_period) for dish in bill.dishes]) + 30)%60} minutes"
+        print(f"Bill details")
+        for i in bill.dishes:
+            print(f"{i.name}-{i.price}AMD\n")
+        with open(f"{customer.name}_{order_date}.txt", "a") as f:
+            for i in bill.dishes:
+                f.write(f"{i.name}-{i.price}AMD\n")
+
+    def order_tracking(self):
+        from time import time
+        order_id = input("Enter order id: ")
+        if order_id not in [order.id for order in self.orders]:
+            print("There is no order with that id.")
+            return
+        for i in self.orders:
+            if i.id == order_id:
+                if time() - i.start_time < i.dish_max_time:
+                    print(time()- i.start_time)
+                    print(i.dish_max_time)
+                    print("Prepairing")
+                if time() - i.start_time >= i.dish_max_time:
+                    print("Dispatched")
+                if time() - i.start_time - i.dish_max_time - 30*60 >= 0:
+                    print("Delivered")
+
+
+
+def client():
+    system = OrderSystem()
+    while True:
+        action = input("Enter 1 for restaurant registration, 2 for customer registration, 3 for placing order, 4 for order tracking, 0 to exit: ")
+        if "1" in action:
+            rest = system.add_restaurant()
+            while True:
+                add_or_remove = input("Enter 1 to add dishes to the menu, 2 to remove, 0 to exit: ")
+                if "1" in add_or_remove:
+                    rest.add_dish_to_menu()
+                if "2" in add_or_remove:
+                    rest.remove_dish_from_menu()
+                if "0" in add_or_remove:
+                    break
+        if "2" in action:
+            system.add_customer()
+        if "3" in action:
+            system.place_order()
+        if "4" in action:
+            system.order_tracking()
+        if "0" in action:
+            break
+
+client()
+
+
+
+
+
+
+
 
 
 
