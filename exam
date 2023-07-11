@@ -1075,6 +1075,162 @@ def client():
 
 client()
 
+import abc
+from datetime import datetime, timedelta
+
+
+class Book:
+    # With the help of this class you can instantiate book objects
+    def __init__(self):
+        self.title = input("Enter book title: ")
+        self.authors = input("Enter authors: ")
+        self.genre = input("Enter genre: ")
+        self.available = True
+        self.borrowed_day = None
+
+
+class Member:
+    def __init__(self):
+        self.name = input("Enter your name: ")
+        self.info = input("Enter your tel.number: ")
+        self.borrowed_book = []
+
+
+class LibrarySystem(abc.ABC):
+    # Abstract class for libraries
+    def add_book(self):
+        raise NotImplementedError
+
+    def add_member(self):
+        raise NotImplementedError
+
+    def search_book(self):
+        raise  NotImplementedError
+
+
+class MYlibrary(LibrarySystem):
+    # Concrete class for library instantiation
+    def __init__(self):
+        self.books = []
+        self.members = []
+
+    def add_book(self):
+        book = Book()
+        if book not in self.books:
+            self.books.append(book)
+        else:
+            print("The book is already registered.")
+
+    def add_member(self):
+        member = Member()
+        if member not in self.members:
+            self.members.append(member)
+        else:
+            print("The book is already registered.")
+
+    def search_book(self):
+        action = input("Enter 1 to search book by title, 2 by author, 3 by genre: ")
+        if "1" in action:
+            book_title = input("Enter title: ")
+            if book_title.lower() not in [b.title.lower() for b in self.books]:
+                print("There is no such a book.")
+            else:
+                books = (b for b in self.books if b.title.lower() == book_title.lower())
+                for book in books:
+                    if book.available is True:
+                        print(f"There is book with {book.title} title and {','.join(book.authors)} authors  and it is available for borrowing.")
+                        return book
+                    else:
+                        print(f"There is book with {book.title} and {book.authors} and it is not available for borrowing.")
+        if "2" in action:
+            book_author = input("Enter author: ")
+            if book_author.lower() not in [book.authors.lower() for book in self.books ]:
+                print("There is no such a book.")
+            else:
+                books = [b for b in self.books if b.authors.lower() == book_author.lower()]
+                for book in books:
+                    if book.available is True:
+                        print(f"There is book with {book.title} and {book.authors} and it is available for borrowing.")
+                        return book
+                    else:
+                        print(f"There is book with {book.title} and {book.authors} and it is not available for borrowing.")
+        if "3" in action:
+            book_genre = input("Enter book genre: ")
+            if book_genre.lower() not in [b.genre.lower() for b in self.books]:
+                print("There is no such a book.")
+            else:
+                books = (b for b in self.books if b.genre.lower() == book_genre.lower())
+                for book in books:
+                    if book.available is True:
+                        print(f"There is book with {book.title} title and {book.authors} authors and it is available for borrowing.")
+                        return book
+                    else:
+                        print(f"There is book with {book.title} and {book.authors} and it is not available for borrowing.")
+
+    def borrow(self):
+        member_name = input("Enter your name:")
+        if member_name.lower() not in [m.name.lower() for m in self.members]:
+            print("Enter you should register at first.")
+        else:
+            member = next((m for m in self.members if m.name.lower() == member_name.lower()))
+            book = self.search_book()
+            if book is not None:
+                borrowed_days = int(input("Enter number of days you want to borrow the book: "))
+                date = datetime.now()
+                book.borrowed_day = date
+                book.return_date = date + timedelta(days=borrowed_days)
+                book.available = False
+                member.borrowed_book.append(book)
+
+    def return_book(self):
+        member_name = input("Enter your name:")
+        if member_name.lower() not in [m.name.lower() for m in self.members]:
+            print("Enter you should register at first.")
+        else:
+            member = next((m for m in self.members if m.name.lower() == member_name.lower()))
+            book_title = input("Enter book title, you want to return: ")
+            if book_title.lower() not in [b.title.lower() for b in member.borrowed_book]:
+                print("You have taken this book from another library")
+            else:
+                book = next((b for b in member.borrowed_book if b.title == book_title))
+                book.available = True
+                member.borrowed_book.remove(book)
+
+    def overdue_report(self):
+        report_date = datetime.now()
+        overdue_books = []
+        for member in self.members:
+            for book in member.borrowed_book:
+                if report_date >= book.return_date + timedelta(days=1):
+                    overdue_books.append(f"{member.name} has borrowed {book.title} book, which is overdue for {(report_date - book.return_date).days} days ")
+        if len(overdue_books) == 0:
+            print("There are no overdue books.")
+
+
+def client():
+    system = MYlibrary()
+    while True:
+        action = input('''Enter 1 to add book, 2 to add member, 3 to search, 4 to borrow book, 5 to return book, 6 for
+overdue report, 0 to exit: ''')
+        if "1" in action:
+            system.add_book()
+        if "2" in action:
+            system.add_member()
+        if "3" in action:
+            system.search_book()
+        if "4" in action:
+            system.borrow()
+        if "5" in action:
+            system.return_book()
+        if "6" in action:
+            system.overdue_report()
+        if "0" in action:
+            break
+
+client()
+
+
+
 
 
 
