@@ -1230,6 +1230,129 @@ overdue report, 0 to exit: ''')
 client()
 
 
+import abc
+import json
+
+
+class Recipe:
+    def __init__(self, name, ingredients, cooking_unstruction):
+        self.name = name
+        self.ingredients = ingredients
+        self.cooking_instruction = cooking_unstruction
+
+
+class User:
+    def __init__(self):
+        while True:
+            self.name = input("Enter your name: ")
+            if self.name.lower().isalpha():
+                break
+            else:
+                print("Name must include only letters.")
+                continue
+        self.recipes = []
+
+
+class RecipeFinder(abc.ABC):
+
+    def add_recipe(self):
+        raise NotImplementedError
+
+    def register_user(self):
+        raise NotImplementedError
+
+    def recipe_search(self):
+        raise NotImplementedError
+
+    def view_recipe(self):
+        raise NotImplementedError
+
+    def save_recipe(self):
+        raise NotImplementedError
+
+    def read_recipe(self):
+        raise NotImplementedError
+
+
+class MyRecipeFinder(RecipeFinder):
+    def __init__(self):
+        self.recipes = []
+        self.users = []
+
+    def add_recipe(self):
+        user_name = input("Enter user name: ")
+        if user_name.lower() not in [user.name for user in self.users]:
+            print("You must register at first")
+        else:
+            user = next((u for u in self.users if u.name.lower() == user_name))
+            name = input("Enter recipe name: ")
+            ingredients = set(input("Enter ingredients separated with ,: ").split(","))
+            cooking_instruction = input("Enter cooking instructions: ")
+            recipe = Recipe(name, ingredients, cooking_instruction)
+            user.recipes.append(recipe)
+            self.recipes.append(recipe)
+
+    def register_user(self):
+        user = User()
+        if user.name in [u.name for u in self.users]:
+            print(f"There is already registered user with {user.name}.")
+        else:
+            self.users.append(user)
+
+    def recipe_search(self):
+        matched_recipe = []
+        entered_ingredients = set(input("Enter ingredients separated with ,: ").split(","))
+        if all(not entered_ingredients.issubset(recipe.ingredients) for recipe in self.recipes):
+            print("No matches")
+        for recipe in self.recipes:
+            if entered_ingredients.issubset(recipe.ingredients):
+                matched_recipe.append(recipe)
+                print(f"{recipe.name}, {recipe.ingredients}")
+
+    def view_recipe(self):
+        recipe_name = input("Enter recipe name to view it's details: ")
+        if recipe_name.lower() not in (r.name.lower() for r in self.recipes):
+            print("There is no such a recipe in the system:")
+        else:
+            for recipe in self.recipes:
+                if recipe_name.lower() == recipe.name.lower():
+                    print(f"Recipe ingredients: {recipe.ingredients}, {recipe.cooking_instruction}")
+
+    def save_recipe(self):
+        with open("Recipes.txt", "w") as f:
+            for recipe in self.recipes:
+                json.dump({recipe.name: [list(recipe.ingredients), recipe.cooking_instruction]}, f)
+                f.write("\n")
+
+    def read_recipe(self):
+        with open("Recipes.txt", "r") as f:
+            for line in f:
+                data = json.loads(line)
+                for k, v in data.items():
+                    recipe = Recipe(k, v[0], v[1])
+                    self.recipes.append(recipe)
+
+
+def client():
+    system = MyRecipeFinder()
+    system.read_recipe()
+    while True:
+        action = input("Enter 1 to add_recipe, 2 to register_user, 3 to search for recipe, 4 to view recipe, "
+                       "0 to exit: ")
+        if "1" in action:
+            system.add_recipe()
+        if "2" in action:
+            system.register_user()
+        if "3" in action:
+            system.recipe_search()
+        if "4" in action:
+            system.view_recipe()
+        if "0" in action:
+            system.save_recipe()
+            break
+
+
+client()
 
 
 
